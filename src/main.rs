@@ -1,19 +1,27 @@
+use clap::Clap;
 use std::env;
 use std::fs;
 use std::sync::Arc;
 use std::time::Duration;
-use clap::Clap;
-use tera::Tera;
 use tera::Context;
-use warp::Filter;
+use tera::Tera;
 use tokio::sync::oneshot;
+use warp::Filter;
 
 #[derive(Clap)]
-#[clap(author = "Keli <root@keli.im>", about="A simple file download server")]
+#[clap(
+    author = "Keli <root@keli.im>",
+    about = "A simple file download server"
+)]
 struct Opts {
-    #[clap(short, long, default_value = "9000", about="Specify alternate port")]
+    #[clap(short, long, default_value = "9000", about = "Specify alternate port")]
     port: u16,
-    #[clap(short, long, default_value = "10", about="Specify running duration in minute")]
+    #[clap(
+        short,
+        long,
+        default_value = "10",
+        about = "Specify running duration in minute"
+    )]
     duration: u64,
 }
 
@@ -31,28 +39,30 @@ async fn main() {
     let index = warp::get()
         .and(warp::path::end())
         .map(move || render(tera.clone(), "index.html", &ctx));
-    let download = warp::path("download")
-        .and(warp::fs::dir("./"));
+    let download = warp::path("download").and(warp::fs::dir("./"));
     let routes = index.or(download).with(warp::log("srv"));
 
-
     let (tx, rx) = oneshot::channel();
-    let (_, server) = warp::serve(routes)
-        .bind_with_graceful_shutdown(([0, 0, 0, 0],opts.port), async {
+    let (_, server) =
+        warp::serve(routes).bind_with_graceful_shutdown(([0, 0, 0, 0], opts.port), async {
             rx.await.ok();
         });
     tokio::task::spawn(server);
-    log::info!("Listen on port {}. Will stop after {} minutes.", opts.port, opts.duration);
+    log::info!(
+        "Listen on port {}. Will stop after {} minutes.",
+        opts.port,
+        opts.duration
+    );
 
     tokio::time::delay_for(Duration::from_secs(opts.duration * 60)).await;
     tx.send(0).unwrap();
     log::info!("Good bye!")
-
 }
 
 fn init_tera() -> Tera {
     let mut tera = Tera::default();
-    tera.add_raw_template("index.html", include_str!("../templates/index.html")).unwrap();
+    tera.add_raw_template("index.html", include_str!("../templates/index.html"))
+        .unwrap();
     tera
 }
 
@@ -75,7 +85,8 @@ fn list_files(dir: &str) -> Vec<String> {
 }
 
 fn render(tera: Arc<Tera>, template_name: &str, ctx: &Context) -> impl warp::Reply {
-    let body = tera.render(template_name, ctx)
-                   .unwrap_or_else(|err| err.to_string());
+    let body = tera
+        .render(template_name, ctx)
+        .unwrap_or_else(|err| err.to_string());
     warp::reply::html(body)
 }
