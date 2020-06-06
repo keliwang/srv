@@ -9,7 +9,7 @@ use warp::Filter;
 use tokio::sync::oneshot;
 
 #[derive(Clap)]
-#[clap(version = "1.0", author = "Keli <root@keli.im>", about="A simple file download server")]
+#[clap(author = "Keli <root@keli.im>", about="A simple file download server")]
 struct Opts {
     #[clap(short, long, default_value = "9000", about="Specify alternate port")]
     port: u16,

@@ -3,7 +3,7 @@ A simple file download server.
 
 ## Help
 ```
-srv 1.0
+srv
 Keli <root@keli.im>
 A simple file download server
 
