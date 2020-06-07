@@ -74,14 +74,12 @@ fn init_index_context(dir: &str) -> Context {
 }
 
 fn list_files(dir: &str) -> Vec<String> {
-    let mut files = vec![];
-    for child in fs::read_dir(dir).unwrap() {
-        let child = child.unwrap();
-        if child.metadata().unwrap().is_file() {
-            files.push(child.file_name().into_string().unwrap());
-        }
-    }
-    files
+    fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|entry| entry)
+        .filter(|child| child.metadata().unwrap().is_file())
+        .flat_map(|child| child.file_name().into_string())
+        .collect()
 }
 
 fn render(tera: Arc<Tera>, template_name: &str, ctx: &Context) -> impl warp::Reply {
