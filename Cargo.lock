@@ -1211,7 +1211,7 @@ dependencies = [
 
 [[package]]
 name = "srv"
-version = "0.1.0"
+version = "0.1.4"
 dependencies = [
  "clap",
  "log 0.4.8",

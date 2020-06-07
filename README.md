@@ -17,5 +17,5 @@ FLAGS:
 OPTIONS:
     -d, --duration <duration>    Specify running duration in minute [default: 10]
     -p, --port <port>            Specify alternate port [default: 9000]
-
+    -w, --workdir <workdir>      Specify work directory [default: .]
 ```
