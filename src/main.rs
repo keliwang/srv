@@ -14,6 +14,8 @@ use warp::Filter;
     about = "A simple file download server"
 )]
 struct Opts {
+    #[clap(short, long, default_value = ".", about = "Specify work directory")]
+    workdir: String,
     #[clap(short, long, default_value = "9000", about = "Specify alternate port")]
     port: u16,
     #[clap(
@@ -35,11 +37,11 @@ async fn main() {
     let opts: Opts = Opts::parse();
 
     let tera = Arc::new(init_tera());
-    let ctx = init_index_context("./");
+    let ctx = init_index_context(&opts.workdir);
     let index = warp::get()
         .and(warp::path::end())
         .map(move || render(tera.clone(), "index.html", &ctx));
-    let download = warp::path("download").and(warp::fs::dir("./"));
+    let download = warp::path("download").and(warp::fs::dir(opts.workdir.clone()));
     let routes = index.or(download).with(warp::log("srv"));
 
     let (tx, rx) = oneshot::channel();
@@ -49,9 +51,10 @@ async fn main() {
         });
     tokio::task::spawn(server);
     log::info!(
-        "Listen on port {}. Will stop after {} minutes.",
+        "Serve directory {} on port {}. Will stop after {} minutes.",
+        opts.workdir,
         opts.port,
-        opts.duration
+        opts.duration,
     );
 
     tokio::time::delay_for(Duration::from_secs(opts.duration * 60)).await;
