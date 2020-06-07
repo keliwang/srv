@@ -1,6 +1,6 @@
 [package]
 name = "srv"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Keli <root@keli.im>"]
 edition = "2018"
 
